@@ -37,7 +37,7 @@ func Get(connectionVariable string, cert ...string) *mgo.Session {
 				session, err = dialWithSSL(cs, cert[0])
 			} else if strings.Contains(cs, "&ssl=true") || strings.Contains(cs, "?ssl=true") {
 				cs = strings.ReplaceAll(cs, "&ssl=true", "")
-				cs = strings.ReplaceAll(cs, "?ssl=true", "")
+				cs = strings.ReplaceAll(cs, "?ssl=true", "?")
 				dialInfo, parseErr := mgo.ParseURL(cs)
 				if parseErr != nil {
 					log.Panicf("unable to parse connection string, %s", parseErr.Error())
