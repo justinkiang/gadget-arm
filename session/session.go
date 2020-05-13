@@ -1,13 +1,14 @@
 package session
 
 import (
+	"log"
 	"os"
 	"strings"
 	"sync"
 
 	"crypto/tls"
 	"crypto/x509"
-	"github.com/jqatampa/gadget-arm/errors"
+	"github.com/justinkiang/gadget-arm/errors"
 	"gopkg.in/mgo.v2"
 	"net"
 	"time"
@@ -34,6 +35,21 @@ func Get(connectionVariable string, cert ...string) *mgo.Session {
 			var session *mgo.Session
 			if cert != nil {
 				session, err = dialWithSSL(cs, cert[0])
+			} else if strings.Contains(cs, "&ssl=true") || strings.Contains(cs, "?ssl=true") {
+				cs = strings.ReplaceAll(cs, "&ssl=true", "")
+				cs = strings.ReplaceAll(cs, "?ssl=true", "")
+				dialInfo, parseErr := mgo.ParseURL(cs)
+				if parseErr != nil {
+					log.Panicf("unable to parse connection string, %s", parseErr.Error())
+				}
+
+				//Below part is similar to above.
+				tlsConfig := &tls.Config{}
+				dialInfo.DialServer = func(addr *mgo.ServerAddr) (net.Conn, error) {
+					conn, err := tls.Dial("tcp", addr.String(), tlsConfig)
+					return conn, err
+				}
+				session, err = mgo.DialWithInfo(dialInfo)
 			} else {
 				session, err = mgo.Dial(cs)
 			}
@@ -47,7 +63,7 @@ func Get(connectionVariable string, cert ...string) *mgo.Session {
 			session.SetMode(mgo.Monotonic, true)
 			sessions[connectionVariable] = session
 		}
-	}else{
+	} else {
 		sessions[connectionVariable].Refresh()
 	}
 
