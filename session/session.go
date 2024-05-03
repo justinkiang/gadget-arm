@@ -3,7 +3,7 @@ package session
 import (
 	"crypto/tls"
 	"crypto/x509"
-	"gadget-arm/errors"
+	"github.com/justinkiang/gadget-arm/errors"
 	"gopkg.in/mgo.v2"
 	"log"
 	"net"
