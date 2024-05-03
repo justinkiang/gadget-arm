@@ -9,7 +9,6 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"github.com/justinkiang/gadget-arm/errors"
-	"gopkg.in/mgo.v2"
 	"net"
 	"time"
 )
@@ -44,7 +43,9 @@ func Get(connectionVariable string, cert ...string) *mgo.Session {
 				}
 
 				//Below part is similar to above.
-				tlsConfig := &tls.Config{}
+				tlsConfig := &tls.Config{
+					InsecureSkipVerify: true,
+				}
 				dialInfo.DialServer = func(addr *mgo.ServerAddr) (net.Conn, error) {
 					conn, err := tls.Dial("tcp", addr.String(), tlsConfig)
 					return conn, err
